@@ -5,7 +5,7 @@ public class Chromosome {
     public Chromosome(int length){
         code = "";
         for (int i = 0; i < length; i++) {
-            char c = (char)(int)(Math.random() * 128);
+            char c = (char)(int)(Math.random() * 72 + 65);
             code += c;
         }
         costScore = 9999;
@@ -30,6 +30,7 @@ public class Chromosome {
         for(int i = 0; i < this.code.length(); i++) {
             int temp  = (this.code.charAt(i) - goal.charAt(i));
             total += temp*temp;
+//            total += Math.abs(temp);
         }
         costScore = total;
     }

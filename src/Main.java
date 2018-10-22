@@ -6,11 +6,12 @@ public class Main {
 
 //        Chromosome a = new Chromosome(13);
 //        while(a.getCostScore() != 0){
-        Populations population = new Populations("hello, world!", 20);
+        Populations population = new Populations("hello, world!", 1000);
         population.generation();
 //        }
         while (population.generation() == false);
         population.display();
+//        System.out.println(population.getGenerationNumber());
 //        System.out.println("happy");
     }
 }
