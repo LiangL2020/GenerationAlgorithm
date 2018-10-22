@@ -84,8 +84,6 @@ public class Populations {
         }
     }
 
-    public void
-
     public boolean generation(){
 
         for (int i = 0; i < individual.size(); i++) {
