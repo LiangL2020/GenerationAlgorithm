@@ -45,14 +45,14 @@ public class Populations {
 
     public void mate1(int a){
         // take a parent string from the arraylist and change a few letters
-        for (int i = 0; i < a; i++) {
-            individual.remove(individual.size() - 1);
-        }
+//        for (int i = 0; i < a; i++) {
+//            individual.remove(individual.size() - 1);
+//        }
 
 //        System.out.println("Size: " + size);
 //        System.out.println("Individual Size: " + individual.size());
-        for (int i = 0; i < a; i++) {
-            Chromosome c = new Chromosome(goal.length());
+        while (individual.size() < size){
+            Chromosome c = new Chromosome(goal.length()); //RANDOM
             individual.add(c);
             int b = (int)(Math.random()*individual.size()); //a random string from the first 15 strings
 //            System.out.println("*15: "+(int)(0.99*15));
@@ -65,46 +65,81 @@ public class Populations {
             String temp = "";
 
             if(e < 0.5) {
-                temp = individual.get(b).getCode().substring(0, d) + individual.get(individual.size() - 1).getCode().substring(d + 1);
+                temp = individual.get(b).getCode().substring(0, d) + individual.get(individual.size() - 1).getCode().substring(d);
             }else{
-                temp = individual.get(individual.size()-1).getCode().substring(0, d) + individual.get(b).getCode().substring(d + 1);
+                temp = individual.get(individual.size()-1).getCode().substring(0, d) + individual.get(b).getCode().substring(d);
             }
 
-            individual.get(individual.size()-1).equals(temp);
+            individual.set(individual.size()-1, new Chromosome(temp));
         }
     }
 
     public void mate2(){
-        for (int i = 0; i < individual.size()/6; i++) {
-            int b = (int)(Math.random()*individual.size()/2); //a random string from the first 15 strings
-            int c = (int)(Math.random()*individual.size()/2);
-            int d = (int)(Math.random()*goal.length() - 1); //a random number between 0 and the length of the goal
-            String temp = individual.get(b).getCode().substring(0,d) + individual.get(c).getCode().substring(d+1);
-            individual.get((individual.size()-1)/2+i).equals(temp);
+
+
+//        System.out.println("Size: " + size);
+//        System.out.println("Individual Size: " + individual.size());
+        while(individual.size() < size){
+//            Chromosome z = new Chromosome(goal.length()); //RANDOM
+//            individual.add(z);
+            int b = (int) (Math.random() * individual.size()); //a random string from the first 15 strings
+            int c = (int) (Math.random() * individual.size()); //a random string from the first 15 strings
+            if(b != c) {
+                int d = (int) (Math.random() * goal.length() - 1); //a random number between 0 and the length of the goal
+                String temp = individual.get(b).getCode().substring(0, d) + individual.get(c).getCode().substring(d);
+                individual.add(new Chromosome(temp));
+            }
+
         }
     }
-
+    public void killOff(int a){
+        for (int i = 0; i < a; i++) {
+            individual.remove(individual.size() - 1);
+        }
+    }
+    public void fillWithRandos(){
+        while(individual.size() < size){
+            individual.add(new Chromosome(goal.length()));
+        }
+    }
+    public void mutateAll(double chance){
+        for (int i = 0; i < this.individual.size(); i++) {
+            individual.get(i).mutate(chance);
+            individual.get(i).calCost(goal);
+        }
+    }
     public boolean generation(){
 
         for (int i = 0; i < individual.size(); i++) {
             individual.get(i).calCost(goal);
         }
-
         sort();
-//        mate2();
-        mate1(size*7/20); //7/20 ratio
         display();
+//        killOff(individual.size()/4);
+//        mate1(100); //7/20 ratio
+//        mate2();
+
+        Chromosome[] kids = individual.get(0).mate(individual.get(1));
+        individual.set(individual.size()-1, kids[0]);
+        individual.set(individual.size()-2, kids[1]);
+
+        Chromosome[] kids2 = individual.get(0).mate2(individual.get(1));
+        individual.set(individual.size()-3, kids2[0]);
+        individual.set(individual.size()-4, kids2[1]);
+
+//        fillWithRandos();
+        mutateAll(.5);
 
 
-        for (int i = 0; i < this.individual.size(); i++) {
-            individual.get(i).mutate(0.5);
-            individual.get(i).calCost(goal);
-            if (individual.get(i).getCode() == goal) {
-                this.sort();
-                this.display();
-                return true;
-            }
-        }
+//        for (int i = 0; i < this.individual.size(); i++) {
+//           // individual.get(i).mutate(0.3);
+//            //individual.get(i).calCost(goal);
+//            if (individual.get(i).getCode() == goal) {
+//                this.sort();
+//                this.display();
+//                return true;
+//            }
+//        }
 
         int temp = 0;
         for (int i = 0; i < individual.size(); i++) {
@@ -116,6 +151,13 @@ public class Populations {
         generationNumber++;
         System.out.println("avg cost: " + temp);
         System.out.println("generation number:" + generationNumber + "\n\n");
+
+        if(individual.get(0).getCostScore() == 0){
+            this.sort();
+            this.display();
+            return true;
+        }
+
         return false;
     }
 
@@ -133,4 +175,74 @@ public class Populations {
 //        return size;
 //    }
 
+
+    /*
+    Mr.Hopps code
+
+    import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+    public class Population {
+
+        private ArrayList<Chromosome> individuals;
+        private int generationNumber;
+        private String goal;
+
+        public Population(int n, String goal){
+            individuals = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                //Make random Chromosomes to start the Population
+                Chromosome temp = new Chromosome(goal.length());
+                individuals.add(temp);
+            }
+            this.goal = goal;
+            generationNumber = 0;
+
+        }
+
+        public boolean nextGen() {
+//        display();
+
+            Chromosome[] kids = individuals.get(0).mate(individuals.get(1));
+            individuals.set(individuals.size()-1, kids[0]);
+            individuals.set(individuals.size()-2, kids[1]);
+
+            Chromosome[] kids2 = individuals.get(0).mate2(individuals.get(1));
+            individuals.set(individuals.size()-3, kids2[0]);
+            individuals.set(individuals.size()-4, kids2[1]);
+
+            for(Chromosome c: individuals)  {
+                c.mutate(.285);
+                c.calculateScore(goal);
+            }
+            sort();
+            display();
+            generationNumber++;
+            if(individuals.get(0).getCostScore() == 0){
+                return true;
+            }
+            return false;
+        }
+
+        public void sort(){
+            Collections.sort(individuals, new Comparator<Chromosome>() {
+                @Override
+                public int compare(Chromosome o1, Chromosome o2) {
+                    return o1.getCostScore() - o2.getCostScore();
+                }
+            });
+        }
+
+        public void display() {
+            System.out.println("Generation " + generationNumber + " size " + individuals.size());
+            for (Chromosome c : individuals)
+                System.out.println(c.getCode() + " (" + c.getCostScore() + ")" + " " + c.getCode().length());
+        }
+
+        public int getGenerationNumber(){
+            return generationNumber;
+        }
+    }
+     */
 }
